@@ -1,0 +1,60 @@
+ADJUST TAKEHOME ASSESSMENT
+#######################################################
+
+
+postgres=# CREATE TABLE adjust_test (id int);
+CREATE TABLE
+postgres=# insert into adjust_test VALUES (5),(3),(6),(7),(9),(10),(7);
+INSERT 0 7
+postgres=# select format('%s - %s',min(id),max(id) )min_max_vals  from adjust_test;
+ min_max_vals 
+--------------
+ 3 - 10
+(1 row)
+
+
+postgres=# create or replace function get_min_max_val( col text,tableName text)
+returns SETOF record
+ LANGUAGE plpgsql
+ AS $$                        
+
+  begin
+
+      RETURN QUERY EXECUTE 'select format(''%s - %s'',min('||$1||E'),max('||$1||E') ) AS min_max_vals from '||$2||E';';
+
+ end
+$$ ;
+
+
+postgres=# SELECT min_max_vals
+FROM 
+    get_min_max_val('id','adjust_test')
+    AS t( min_max_vals tEXT) ;
+
+ min_max_vals 
+--------------
+ 3 - 10
+(1 row)
+
+--------------------------------------
+TESTED AGAIN BY CALLING THE FUNCTION  WITH A DIFFERENT TABLE. sEE BELOW
+
+postgres=# create table adjust_take_home(id int);
+CREATE TABLE
+postgres=# insert into adjust_take_home values (5),(3),(6),(7),(9),(10),(7),(17),(87),(4);
+INSERT 0 10
+postgres=# SELECT min_max_vals
+FROM 
+    get_min_max_val('id','adjust_ta')
+    AS t( min_max_vals tEXT) ;
+
+postgres=# SELECT min_max_vals
+FROM 
+    get_min_max_val('id','adjust_take_home')
+    AS t( min_max_vals tEXT) ;
+ min_max_vals 
+--------------
+ 3 - 87
+(1 row)
+
+
